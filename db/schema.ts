@@ -1,0 +1,4 @@
+import {sqliteTable,text,integer,index,primaryKey} from 'drizzle-orm/sqlite-core';
+export const posts=sqliteTable('posts',{id:text('id').primaryKey(),userId:text('user_id').notNull(),name:text('name').notNull(),kind:text('kind').notNull(),minutes:integer('minutes').notNull(),note:text('note').notNull(),photoKey:text('photo_key'),createdAt:integer('created_at').notNull()},t=>[index('posts_created_at').on(t.createdAt),index('posts_user_id').on(t.userId)]);
+export const cheers=sqliteTable('cheers',{postId:text('post_id').notNull().references(()=>posts.id,{onDelete:'cascade'}),userId:text('user_id').notNull()},t=>[primaryKey({columns:[t.postId,t.userId]})]);
+export const pokes=sqliteTable('pokes',{id:text('id').primaryKey(),senderId:text('sender_id').notNull(),recipientId:text('recipient_id').notNull(),createdAt:integer('created_at').notNull()},t=>[index('pokes_recipient_id').on(t.recipientId),index('pokes_created_at').on(t.createdAt)]);

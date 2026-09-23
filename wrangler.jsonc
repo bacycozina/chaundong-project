@@ -11,6 +11,7 @@
     {
       "binding": "DB",
       "database_name": "chaundong-db",
+      "database_id": "22b9e6f3-16f0-4e6e-9faf-6bac0547e702",
       "migrations_dir": "drizzle"
     }
   ],

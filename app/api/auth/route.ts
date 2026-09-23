@@ -1,5 +1,5 @@
 import {database,json,sameOrigin} from '@/db/store';
-import {passwordHash,randomToken,tokenHash,matches} from '@/app/auth-crypto';
+import {passwordHash,randomToken,tokenHash,verifyPassword} from '@/app/auth-crypto';
 const ttl=60*60*24*14;
 export async function POST(request:Request){
  if(!sameOrigin(request))return json({error:'잘못된 요청이에요.'},403);
@@ -34,8 +34,8 @@ export async function POST(request:Request){
  statements.push(db.prepare('INSERT INTO users (id,username,name,password_hash,salt,club_id,created_at) VALUES (?,?,?,?,?,?,?)').bind(id,username,name,hash,salt,clubId,now));
  await db.batch(statements);user={id,password_hash:hash,salt};
  }else{
- const actual=passwordHash(password,user?.salt||'00000000000000000000000000000000');
- if(!user||!matches(actual,user.password_hash))return json({error:'아이디 또는 비밀번호를 확인해 주세요.'},401);
+ const valid=user?verifyPassword(password,user.salt,user.password_hash):(passwordHash(password,'00000000000000000000000000000000'),false);
+ if(!user||!valid)return json({error:'아이디 또는 비밀번호를 확인해 주세요.'},401);
  }
  const token=randomToken();await db.prepare('INSERT INTO sessions (token_hash,user_id,expires_at) VALUES (?,?,?)').bind(tokenHash(token),user.id,now+ttl*1000).run();
  await db.prepare('DELETE FROM sessions WHERE expires_at<?').bind(now).run();
